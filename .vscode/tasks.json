@@ -1,0 +1,124 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build: dev",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "build",
+        "apk",
+        "--debug",
+        "--dart-define=ENVIRONMENT=dev"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/quincena"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [
+        "$dart-build"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": false,
+        "clear": true
+      }
+    },
+    {
+      "label": "build: prod",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "build",
+        "apk",
+        "--release",
+        "--dart-define=ENVIRONMENT=prod"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/quincena"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$dart-build"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": false,
+        "clear": true
+      }
+    },
+    {
+      "label": "build: prod (appbundle)",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "build",
+        "appbundle",
+        "--release",
+        "--dart-define=ENVIRONMENT=prod"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/quincena"
+      },
+      "group": "build",
+      "problemMatcher": [
+        "$dart-build"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": false,
+        "clear": true
+      }
+    },
+    {
+      "label": "flutter: pub get",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "pub",
+        "get"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/quincena"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "flutter: clean",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "clean"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/quincena"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "flutter: analyze",
+      "type": "shell",
+      "command": "dart",
+      "args": [
+        "analyze",
+        "lib"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/quincena"
+      },
+      "group": "test",
+      "problemMatcher": [
+        "$dart-analyze"
+      ]
+    }
+  ]
+}
