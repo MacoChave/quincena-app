@@ -119,6 +119,22 @@
       "problemMatcher": [
         "$dart-analyze"
       ]
+    },
+    {
+      "label": "adb: reverse port 3000",
+      "type": "shell",
+      "command": "${env:LOCALAPPDATA}/Android/Sdk/platform-tools/adb",
+      "args": [
+        "reverse",
+        "tcp:3000",
+        "tcp:3000"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "never",
+        "panel": "shared",
+        "close": true
+      }
     }
   ]
 }
