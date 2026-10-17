@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/components/app_components.dart';
+import '../../../core/network/api_exception.dart';
 import '../../../core/theme/theme.dart';
 import '../data/auth_session_manager.dart';
 
@@ -49,7 +50,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = e.toString().replaceFirst('ApiException: ', '');
+        _errorMessage = ApiException.extractMessage(e);
       });
     }
   }

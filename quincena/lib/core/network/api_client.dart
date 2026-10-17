@@ -9,11 +9,9 @@ import 'api_exception.dart';
 ///
 /// Gestiona headers comunes, token JWT en Bearer y deserialización de errores.
 class ApiClient {
-  ApiClient({
-    String? baseUrl,
-    http.Client? httpClient,
-  })  : _httpClient = httpClient ?? http.Client(),
-        _baseUrl = baseUrl ?? _defaultBaseUrl;
+  ApiClient({String? baseUrl, http.Client? httpClient})
+    : _httpClient = httpClient ?? http.Client(),
+      _baseUrl = baseUrl ?? _defaultBaseUrl;
 
   final http.Client _httpClient;
   String _baseUrl;
@@ -28,9 +26,13 @@ class ApiClient {
       return configured;
     }
 
-    // Si corre en emulador Android nativo usa 10.0.2.2, de lo contrario localhost
+    // Por defecto en desarrollo:
+    // - En dispositivo físico Android por USB (con "adb reverse tcp:3000 tcp:3000"): usa 127.0.0.1
+    // - En emulador Android nativo (AVD): usa 10.0.2.2
+    // - Si deseas conectar por Wi-Fi sin cable: usa tu IP local (http://192.168.10.116:3000/v1)
     if (!kIsWeb && Platform.isAndroid) {
-      return 'http://10.0.2.2:3000/v1';
+      // 127.0.0.1 permite tráfico directo por cable USB mediante el túnel ADB
+      return 'http://127.0.0.1:3000/v1';
     }
     return 'http://localhost:3000/v1';
   }
@@ -63,7 +65,10 @@ class ApiClient {
 
   Future<dynamic> get(String endpoint, {Map<String, String>? headers}) async {
     final uri = Uri.parse('$_baseUrl$endpoint');
-    final response = await _httpClient.get(uri, headers: _buildHeaders(headers));
+    final response = await _httpClient.get(
+      uri,
+      headers: _buildHeaders(headers),
+    );
     return _handleResponse(response);
   }
 

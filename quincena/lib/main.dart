@@ -106,9 +106,7 @@ class _MainShellState extends State<MainShell> {
         dashboardApiService: _dashboardApiService,
         onOpenProfile: () => setState(() => _currentIndex = 3),
         onScanReceipt: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Acción: Escaneo OCR de Comprobantes')),
-          );
+          AppToast.showInfo(context, 'Acción: Escaneo OCR de Comprobantes');
         },
       ),
       BudgetScreen(
@@ -133,13 +131,8 @@ class _MainShellState extends State<MainShell> {
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: AppFab(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Acción: Abrir Escáner OCR de Tickets')),
-          );
+        onFabPressed: () {
+          AppToast.showInfo(context, 'Acción: Abrir Escáner OCR de Tickets');
         },
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/components/app_components.dart';
+import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../auth/data/auth_session_manager.dart';
 
@@ -52,18 +53,14 @@ class _UpdatePasswordSheetState extends State<UpdatePasswordSheet> {
 
       if (!mounted) return;
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Contraseña actualizada con éxito.'),
-          backgroundColor: AppColors.incomeText,
-        ),
-      );
+      AppToast.showSuccess(context, 'Contraseña actualizada con éxito.');
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = e.toString().replaceFirst('ApiException: ', '');
+        _errorMessage = ApiException.extractMessage(e);
       });
+      AppToast.showError(context, e);
     }
   }
 

@@ -147,21 +147,14 @@ class _FinancialAccountsScreenState extends State<FinancialAccountsScreen>
       await widget.accountsService.setDefaultAccount(account.id);
       _loadAccounts();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${account.name} es ahora tu cuenta predeterminada'),
-            backgroundColor: AppColors.incomeText,
-          ),
+        AppToast.showSuccess(
+          context,
+          '${account.name} es ahora tu cuenta predeterminada',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al cambiar cuenta predeterminada: $e'),
-            backgroundColor: AppColors.expenseText,
-          ),
-        );
+        AppToast.showError(context, e);
       }
     }
   }
@@ -204,21 +197,11 @@ class _FinancialAccountsScreenState extends State<FinancialAccountsScreen>
         await widget.accountsService.archiveAccount(account.id);
         _loadAccounts();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Cuenta "${account.name}" archivada'),
-              backgroundColor: AppColors.textMain,
-            ),
-          );
+          AppToast.showInfo(context, 'Cuenta "${account.name}" archivada');
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error al archivar la cuenta: $e'),
-              backgroundColor: AppColors.expenseText,
-            ),
-          );
+          AppToast.showError(context, e);
         }
       }
     }
@@ -229,21 +212,11 @@ class _FinancialAccountsScreenState extends State<FinancialAccountsScreen>
       await widget.accountsService.updateAccount(account.id, isArchived: false);
       _loadAccounts();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Cuenta "${account.name}" reactivada'),
-            backgroundColor: AppColors.incomeText,
-          ),
-        );
+        AppToast.showSuccess(context, 'Cuenta "${account.name}" reactivada');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al reactivar cuenta: $e'),
-            backgroundColor: AppColors.expenseText,
-          ),
-        );
+        AppToast.showError(context, e);
       }
     }
   }
