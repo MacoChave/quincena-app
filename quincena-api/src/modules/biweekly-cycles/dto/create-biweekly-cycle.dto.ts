@@ -1,6 +1,14 @@
 import {
-  IsEnum, IsInt, IsString, IsOptional, IsUUID, IsNumber, IsBoolean,
-  Min, Max, IsDateString,
+  IsEnum,
+  IsInt,
+  IsString,
+  IsOptional,
+  IsUUID,
+  IsNumber,
+  IsBoolean,
+  Min,
+  Max,
+  IsDateString,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -26,20 +34,28 @@ export class CreateBiweeklyCycleDto {
   @IsEnum(QuincenaPeriod)
   period: QuincenaPeriod;
 
-  @ApiProperty({ example: '2026-10-01', description: 'Fecha de inicio (YYYY-MM-DD)' })
+  @ApiProperty({
+    example: '2026-10-01',
+    description: 'Fecha de inicio (YYYY-MM-DD)',
+  })
   @IsDateString()
   start_date: string;
 
-  @ApiProperty({ example: '2026-10-15', description: 'Fecha de fin (YYYY-MM-DD)' })
+  @ApiProperty({
+    example: '2026-10-15',
+    description: 'Fecha de fin (YYYY-MM-DD)',
+  })
   @IsDateString()
   end_date: string;
 
-  @ApiProperty({ example: 7000.00, description: 'Ingreso total de la quincena' })
+  @ApiProperty({ example: 7000.0, description: 'Ingreso total de la quincena' })
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   total_income: number;
 
-  @ApiPropertyOptional({ description: 'ID de la cuenta de destino del ingreso' })
+  @ApiPropertyOptional({
+    description: 'ID de la cuenta de destino del ingreso',
+  })
   @IsOptional()
   @IsUUID()
   income_destination_account_id?: string;

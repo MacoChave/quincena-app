@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsUUID, Length, Matches } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsUUID,
+  Length,
+  Matches,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateCategoryDto {
@@ -17,7 +24,9 @@ export class CreateCategoryDto {
   @ApiPropertyOptional({ example: '#79ADDC' })
   @IsOptional()
   @IsString()
-  @Matches(/^#[0-9A-Fa-f]{6}$/, { message: 'color_hex debe ser un código hexadecimal válido (#RRGGBB)' })
+  @Matches(/^#[0-9A-Fa-f]{6}$/, {
+    message: 'color_hex debe ser un código hexadecimal válido (#RRGGBB)',
+  })
   color_hex?: string;
 
   @ApiPropertyOptional({ example: 'uuid-de-cuenta' })

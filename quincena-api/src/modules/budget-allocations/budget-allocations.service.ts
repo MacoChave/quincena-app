@@ -17,8 +17,28 @@ export interface AllocationWithSpent {
   spent_amount: number;
   available_amount: number;
   spent_percentage: number;
-  categories: { id: string; name: string; icon: string; color_hex: string } | null;
-  destination_account: { id: string; name: string; color_hex: string } | null;
+  categories: {
+    id: string;
+    name: string;
+    icon: string;
+    color_hex: string;
+  } | null;
+  destination_account: {
+    id: string;
+    name: string;
+    color_hex: string;
+    icon?: string;
+  } | null;
+}
+
+export interface BudgetSummary {
+  total_income: number;
+  total_allocated: number;
+  unallocated: number;
+  total_spent: number;
+  total_available: number;
+  is_balanced: boolean;
+  is_closed: boolean;
 }
 
 @Injectable()
@@ -33,7 +53,7 @@ export class BudgetAllocationsService {
     cycleId: string,
     userId: string,
     accessToken: string,
-  ): Promise<{ allocations: AllocationWithSpent[]; summary: object }> {
+  ): Promise<{ allocations: AllocationWithSpent[]; summary: BudgetSummary }> {
     const client = this.supabase.getAuthenticatedClient(accessToken);
 
     // Verificar que el ciclo pertenece al usuario
@@ -44,13 +64,14 @@ export class BudgetAllocationsService {
       .eq('user_id', userId)
       .single();
 
-    if (cycleError || !cycle) throw new NotFoundException('Ciclo no encontrado');
+    if (cycleError || !cycle)
+      throw new NotFoundException('Ciclo no encontrado');
 
     // Obtener asignaciones con sus categorías y cuentas destino
     const { data: allocations, error: allocError } = await client
       .from('budget_allocations')
       .select(
-        '*, categories(id, name, icon, color_hex), destination_account:financial_accounts(id, name, color_hex)',
+        '*, categories(id, name, icon, color_hex), destination_account:financial_accounts(id, name, color_hex, icon)',
       )
       .eq('cycle_id', cycleId)
       .order('categories(name)');
@@ -106,7 +127,8 @@ export class BudgetAllocationsService {
         unallocated: Number(cycle.total_income) - totalAllocated, // "Por Asignar" CA-02.1
         total_spent: totalSpent,
         total_available: totalAllocated - totalSpent,
-        is_balanced: Math.abs(Number(cycle.total_income) - totalAllocated) < 0.01,
+        is_balanced:
+          Math.abs(Number(cycle.total_income) - totalAllocated) < 0.01,
         is_closed: cycle.is_closed,
       },
     };
@@ -134,10 +156,22 @@ export class BudgetAllocationsService {
       );
     }
 
+    const destinationAccountId =
+      dto.destination_account_id !== undefined
+        ? dto.destination_account_id
+        : (dto.financial_account_id ?? null);
+
     const { data, error } = await client
       .from('budget_allocations')
-      .insert(dto)
-      .select('*, categories(id, name, icon, color_hex)')
+      .insert({
+        cycle_id: dto.cycle_id,
+        category_id: dto.category_id,
+        destination_account_id: destinationAccountId,
+        allocated_amount: dto.allocated_amount,
+      })
+      .select(
+        '*, categories(id, name, icon, color_hex), destination_account:financial_accounts(id, name, color_hex, icon)',
+      )
       .single();
 
     if (error) {
@@ -177,18 +211,36 @@ export class BudgetAllocationsService {
       is_closed: boolean;
     };
 
-    if (cycle.user_id !== userId) throw new NotFoundException('Asignación no encontrada');
+    if (cycle.user_id !== userId)
+      throw new NotFoundException('Asignación no encontrada');
     if (cycle.is_closed) {
       throw new BadRequestException(
         'No se puede modificar una asignación en un ciclo cerrado (RN-01)',
       );
     }
 
+    const destinationAccountId =
+      dto.destination_account_id !== undefined
+        ? dto.destination_account_id
+        : dto.financial_account_id;
+
+    const updatePayload: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (dto.allocated_amount !== undefined) {
+      updatePayload.allocated_amount = dto.allocated_amount;
+    }
+    if (destinationAccountId !== undefined) {
+      updatePayload.destination_account_id = destinationAccountId;
+    }
+
     const { data, error } = await client
       .from('budget_allocations')
-      .update({ ...dto, updated_at: new Date().toISOString() })
+      .update(updatePayload)
       .eq('id', id)
-      .select()
+      .select(
+        '*, categories(id, name, icon, color_hex), destination_account:financial_accounts(id, name, color_hex, icon)',
+      )
       .single();
 
     if (error || !data) throw new NotFoundException('Asignación no encontrada');

@@ -9,6 +9,7 @@ import { BiweeklyCyclesModule } from './modules/biweekly-cycles/biweekly-cycles.
 import { BudgetAllocationsModule } from './modules/budget-allocations/budget-allocations.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { ReceiptScansModule } from './modules/receipt-scans/receipt-scans.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ReceiptScansModule } from './modules/receipt-scans/receipt-scans.module
     SupabaseModule,
 
     // Módulos del dominio
+    AuthModule,
     ProfilesModule,
     FinancialAccountsModule,
     CategoriesModule,

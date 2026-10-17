@@ -15,7 +15,17 @@ export class CreateBudgetAllocationDto {
   @IsUUID()
   destination_account_id?: string;
 
-  @ApiProperty({ example: 800.00, description: 'Monto asignado a esta categoría' })
+  @ApiPropertyOptional({
+    description: 'Alias para destination_account_id (RF-03)',
+  })
+  @IsOptional()
+  @IsUUID()
+  financial_account_id?: string;
+
+  @ApiProperty({
+    example: 800.0,
+    description: 'Monto asignado a esta categoría',
+  })
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   allocated_amount: number;

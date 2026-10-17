@@ -1,16 +1,31 @@
 import {
-  Controller, Get, Post, Param, Body, UseGuards,
-  UseInterceptors, UploadedFile, ParseUUIDPipe,
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
-  ApiBearerAuth, ApiOperation, ApiTags, ApiCreatedResponse,
-  ApiOkResponse, ApiConsumes, ApiBody,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiTags,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 import { ReceiptScansService } from './receipt-scans.service';
 import { ConfirmReceiptScanDto } from './dto/confirm-receipt-scan.dto';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
-import { CurrentUser, AccessToken } from '../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  AccessToken,
+} from '../../common/decorators/current-user.decorator';
 import { User } from '@supabase/supabase-js';
 
 @ApiTags('receipt-scans')

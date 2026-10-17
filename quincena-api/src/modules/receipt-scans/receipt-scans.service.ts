@@ -25,7 +25,8 @@ export class ReceiptScansService {
       .eq('user_id', userId)
       .single();
 
-    if (error || !data) throw new NotFoundException('Comprobante no encontrado');
+    if (error || !data)
+      throw new NotFoundException('Comprobante no encontrado');
     return data;
   }
 

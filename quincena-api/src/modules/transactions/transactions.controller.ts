@@ -1,16 +1,33 @@
 import {
-  Controller, Get, Post, Patch, Delete, Body, Param, Query,
-  ParseUUIDPipe, UseGuards, ParseBoolPipe,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  ParseUUIDPipe,
+  UseGuards,
+  ParseBoolPipe,
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiOperation, ApiTags, ApiCreatedResponse,
-  ApiOkResponse, ApiQuery, ApiBody,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiTags,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiQuery,
+  ApiBody,
 } from '@nestjs/swagger';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
-import { CurrentUser, AccessToken } from '../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  AccessToken,
+} from '../../common/decorators/current-user.decorator';
 import { User } from '@supabase/supabase-js';
 
 @ApiTags('transactions')
@@ -22,8 +39,14 @@ export class TransactionsController {
 
   @Get()
   @ApiOperation({ summary: 'Listar transacciones de un ciclo quincenal' })
-  @ApiOkResponse({ description: 'Lista de transacciones con categorías y cuenta origen' })
-  @ApiQuery({ name: 'cycleId', required: true, description: 'ID del ciclo quincenal' })
+  @ApiOkResponse({
+    description: 'Lista de transacciones con categorías y cuenta origen',
+  })
+  @ApiQuery({
+    name: 'cycleId',
+    required: true,
+    description: 'ID del ciclo quincenal',
+  })
   findByCycle(
     @Query('cycleId', ParseUUIDPipe) cycleId: string,
     @CurrentUser() user: User,

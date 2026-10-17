@@ -1,15 +1,31 @@
 import {
-  Controller, Get, Post, Patch, Delete, Body, Param, Query,
-  ParseUUIDPipe, UseGuards,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiOperation, ApiTags, ApiCreatedResponse, ApiOkResponse, ApiQuery,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiTags,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { BudgetAllocationsService } from './budget-allocations.service';
 import { CreateBudgetAllocationDto } from './dto/create-budget-allocation.dto';
 import { UpdateBudgetAllocationDto } from './dto/update-budget-allocation.dto';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
-import { CurrentUser, AccessToken } from '../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  AccessToken,
+} from '../../common/decorators/current-user.decorator';
 import { User } from '@supabase/supabase-js';
 
 @ApiTags('budget-allocations')
@@ -21,10 +37,17 @@ export class BudgetAllocationsController {
 
   @Get()
   @ApiOperation({
-    summary: 'Obtener asignaciones de un ciclo con saldo disponible y "Por Asignar" (CA-02.1)',
+    summary:
+      'Obtener asignaciones de un ciclo con saldo disponible y "Por Asignar" (CA-02.1)',
   })
-  @ApiOkResponse({ description: 'Asignaciones del ciclo con resumen financiero' })
-  @ApiQuery({ name: 'cycleId', required: true, description: 'ID del ciclo quincenal' })
+  @ApiOkResponse({
+    description: 'Asignaciones del ciclo con resumen financiero',
+  })
+  @ApiQuery({
+    name: 'cycleId',
+    required: true,
+    description: 'ID del ciclo quincenal',
+  })
   findByCycle(
     @Query('cycleId', ParseUUIDPipe) cycleId: string,
     @CurrentUser() user: User,
@@ -46,7 +69,8 @@ export class BudgetAllocationsController {
 
   @Patch(':id')
   @ApiOperation({
-    summary: 'Actualizar monto de asignación (RN-02: rebalanceo inter-categorías)',
+    summary:
+      'Actualizar monto de asignación (RN-02: rebalanceo inter-categorías)',
   })
   @ApiOkResponse({ description: 'Asignación actualizada' })
   update(

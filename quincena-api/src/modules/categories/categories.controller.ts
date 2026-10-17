@@ -20,7 +20,10 @@ import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
-import { CurrentUser, AccessToken } from '../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  AccessToken,
+} from '../../common/decorators/current-user.decorator';
 import { User } from '@supabase/supabase-js';
 
 @ApiTags('categories')

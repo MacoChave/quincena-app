@@ -2,7 +2,10 @@ import { IsNumber, IsOptional, IsUUID, Min } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateBiweeklyCycleDto {
-  @ApiPropertyOptional({ example: 7500.00, description: 'Ingreso total actualizado' })
+  @ApiPropertyOptional({
+    example: 7500.0,
+    description: 'Ingreso total actualizado',
+  })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)

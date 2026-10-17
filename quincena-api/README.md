@@ -64,6 +64,7 @@ Una vez en ejecución:
 
 | Ruta | Descripción |
 |---|---|
+| `/v1/auth` | Registro, Login, Recuperación de contraseña y Baja de cuenta (DERCAS v1.3) |
 | `/v1/profiles` | Perfil del usuario autenticado |
 | `/v1/financial-accounts` | Cuentas bancarias y billeteras |
 | `/v1/categories` | Categorías de gasto |
@@ -77,13 +78,13 @@ Una vez en ejecución:
 
 ## Autenticación
 
-Todos los endpoints requieren un **Bearer JWT** de Supabase en el header:
+Los endpoints del dominio requieren un **Bearer JWT** de Supabase en el header:
 
 ```
 Authorization: Bearer <supabase-access-token>
 ```
 
-El token se obtiene al hacer login con el SDK de Supabase desde la app Flutter.
+El token se obtiene a través de `POST /v1/auth/login` o con el SDK de Supabase desde la app Flutter.
 
 ---
 
@@ -91,6 +92,12 @@ El token se obtiene al hacer login con el SDK de Supabase desde la app Flutter.
 
 | Regla | Descripción | Endpoint |
 |---|---|---|
+| **RF-AUTH-01** | Registro con validación de contraseña robusta (min 8 chars, 1 mayús, 1 minús, 1 núm) | `POST /v1/auth/register` |
+| **RF-AUTH-01** | Inicio de sesión con emisión de tokens JWT | `POST /v1/auth/login` |
+| **RF-AUTH-02** | Recuperación con mitigación de enumeración y deep link | `POST /v1/auth/forgot-password` |
+| **RF-AUTH-02** | Actualización de contraseña para sesión autenticada / reset | `POST /v1/auth/update-password` |
+| **RF-AUTH-03** | Cierre seguro de sesión invalidando tokens | `POST /v1/auth/logout` |
+| **RF-AUTH-04 / RN-AUTH-02** | Eliminación permanente e irreversible con doble factor (password + confirmación) y purgado de Storage | `POST /v1/auth/delete-account` |
 | **RN-01** | Ciclos cerrados no aceptan cambios | Todos los endpoints que modifican datos |
 | **RN-02** | Rebalanceo entre categorías sin alterar ingreso | `PATCH /budget-allocations/:id` |
 | **RN-03** | Detección de duplicados ±24h | `POST /transactions?force=true` para bypassear |

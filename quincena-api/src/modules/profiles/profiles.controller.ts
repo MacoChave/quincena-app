@@ -8,7 +8,10 @@ import {
 import { ProfilesService } from './profiles.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
-import { CurrentUser, AccessToken } from '../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  AccessToken,
+} from '../../common/decorators/current-user.decorator';
 import { User } from '@supabase/supabase-js';
 
 @ApiTags('profiles')
@@ -21,10 +24,7 @@ export class ProfilesController {
   @Get('me')
   @ApiOperation({ summary: 'Obtener perfil del usuario autenticado' })
   @ApiOkResponse({ description: 'Perfil del usuario' })
-  getMe(
-    @CurrentUser() user: User,
-    @AccessToken() token: string,
-  ) {
+  getMe(@CurrentUser() user: User, @AccessToken() token: string) {
     return this.profilesService.findMe(user.id, token);
   }
 

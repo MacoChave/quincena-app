@@ -17,7 +17,8 @@ export class CloseCycleDto {
   rollover_action: RolloverAction;
 
   @ApiPropertyOptional({
-    description: 'ID de cuenta de ahorro destino (requerido si rollover_action=transfer_to_savings)',
+    description:
+      'ID de cuenta de ahorro destino (requerido si rollover_action=transfer_to_savings)',
   })
   @IsOptional()
   @IsUUID()

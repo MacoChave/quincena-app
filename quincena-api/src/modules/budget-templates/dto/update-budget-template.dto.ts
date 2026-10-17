@@ -12,4 +12,12 @@ export class UpdateBudgetTemplateDto {
   @IsOptional()
   @IsUUID()
   destination_account_id?: string;
+
+  @ApiPropertyOptional({
+    example: 'uuid-cuenta',
+    description: 'Alias para destination_account_id (RF-03)',
+  })
+  @IsOptional()
+  @IsUUID()
+  financial_account_id?: string;
 }

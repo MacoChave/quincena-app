@@ -112,7 +112,8 @@ export class TransactionsService {
       .select()
       .single();
 
-    if (error || !data) throw new NotFoundException('Transacción no encontrada');
+    if (error || !data)
+      throw new NotFoundException('Transacción no encontrada');
     return data;
   }
 
