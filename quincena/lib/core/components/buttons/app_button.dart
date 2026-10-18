@@ -97,10 +97,14 @@ class AppButton extends StatelessWidget {
                   prefixIcon!,
                   const SizedBox(width: 8),
                 ],
-                Text(
-                  text,
-                  style: AppTypography.labelLg.copyWith(
-                    color: foregroundColor,
+                Flexible(
+                  child: Text(
+                    text,
+                    style: AppTypography.labelLg.copyWith(
+                      color: foregroundColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 if (suffixIcon != null) ...[

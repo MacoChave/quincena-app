@@ -15,6 +15,7 @@ class AllocationFormSheet extends StatefulWidget {
     required this.accounts,
     required this.currentUnallocated,
     required this.onSave,
+    this.onCreateCategoryRequested,
   });
 
   final BudgetAllocation? allocation;
@@ -26,6 +27,7 @@ class AllocationFormSheet extends StatefulWidget {
     required double allocatedAmount,
     String? destinationAccountId,
   }) onSave;
+  final Future<Category?> Function()? onCreateCategoryRequested;
 
   @override
   State<AllocationFormSheet> createState() => _AllocationFormSheetState();
@@ -33,6 +35,7 @@ class AllocationFormSheet extends StatefulWidget {
 
 class _AllocationFormSheetState extends State<AllocationFormSheet> {
   late final TextEditingController _amountController;
+  late List<Category> _categories;
   String? _selectedCategoryId;
   String? _selectedAccountId;
   bool _isSaving = false;
@@ -43,6 +46,7 @@ class _AllocationFormSheetState extends State<AllocationFormSheet> {
   @override
   void initState() {
     super.initState();
+    _categories = List.from(widget.categories);
     final initialAmount = widget.allocation != null
         ? widget.allocation!.allocatedAmount.toStringAsFixed(2)
         : '';
@@ -51,8 +55,12 @@ class _AllocationFormSheetState extends State<AllocationFormSheet> {
     if (widget.allocation != null) {
       _selectedCategoryId = widget.allocation!.categoryId;
       _selectedAccountId = widget.allocation!.destinationAccountId;
-    } else if (widget.categories.isNotEmpty) {
-      _selectedCategoryId = widget.categories.first.id;
+    } else if (_categories.isNotEmpty) {
+      _selectedCategoryId = _categories.first.id;
+      final defaultAcc = _categories.first.defaultAccountId;
+      if (defaultAcc != null && defaultAcc.isNotEmpty) {
+        _selectedAccountId = defaultAcc;
+      }
     }
   }
 
@@ -178,7 +186,7 @@ class _AllocationFormSheetState extends State<AllocationFormSheet> {
                   value: _selectedCategoryId,
                   isExpanded: true,
                   hint: const Text('Seleccionar categoría'),
-                  items: widget.categories.map((cat) {
+                  items: _categories.map((cat) {
                     final catColor = cat.parsedColor;
                     final catIcon = resolveCategoryIcon(cat.icon);
                     return DropdownMenuItem<String>(
@@ -208,10 +216,50 @@ class _AllocationFormSheetState extends State<AllocationFormSheet> {
                   }).toList(),
                   onChanged: isEditing
                       ? null // En edición, la categoría permanece fija para mantener identidad
-                      : (val) => setState(() => _selectedCategoryId = val),
+                      : (val) {
+                          setState(() {
+                            _selectedCategoryId = val;
+                            final cat = _categories.where((c) => c.id == val).firstOrNull;
+                            if (cat != null && cat.defaultAccountId != null && cat.defaultAccountId!.isNotEmpty) {
+                              _selectedAccountId = cat.defaultAccountId;
+                            }
+                          });
+                        },
                 ),
               ),
             ),
+            if (!isEditing && widget.onCreateCategoryRequested != null) ...[
+              const SizedBox(height: 6),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  ),
+                  icon: const Icon(Icons.add_circle_outline_rounded, size: 16, color: AppColors.primaryAccessible),
+                  label: Text(
+                    '+ Nueva Categoría',
+                    style: AppTypography.captionBadge.copyWith(
+                      color: AppColors.primaryAccessible,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  onPressed: () async {
+                    final newCat = await widget.onCreateCategoryRequested!();
+                    if (newCat != null && mounted) {
+                      setState(() {
+                        _categories.add(newCat);
+                        _selectedCategoryId = newCat.id;
+                        if (newCat.defaultAccountId != null && newCat.defaultAccountId!.isNotEmpty) {
+                          _selectedAccountId = newCat.defaultAccountId;
+                        }
+                      });
+                    }
+                  },
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
 
             // Entrada de Monto

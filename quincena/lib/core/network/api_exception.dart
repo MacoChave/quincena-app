@@ -6,11 +6,15 @@ class ApiException implements Exception {
     required this.statusCode,
     required this.message,
     this.error,
+    this.details,
   });
 
   final int statusCode;
   final String message;
   final String? error;
+
+  /// Datos estructurados retornados por el servidor (p. ej. duplicate_warning, existing_transactions)
+  final dynamic details;
 
   bool get isUnauthorized => statusCode == 401;
   bool get isForbidden => statusCode == 403;

@@ -17,17 +17,19 @@ class HomeScreen extends StatefulWidget {
     required this.dashboardApiService,
     required this.onOpenProfile,
     this.onScanReceipt,
+    this.refreshListenable,
   });
 
   final DashboardApiService dashboardApiService;
   final VoidCallback onOpenProfile;
   final VoidCallback? onScanReceipt;
+  final Listenable? refreshListenable;
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> {
   late Future<DashboardData> _dashboardFuture;
   bool _isInitializingCycle = false;
 
@@ -35,7 +37,26 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadDashboard();
+    widget.refreshListenable?.addListener(_loadDashboard);
   }
+
+  @override
+  void didUpdateWidget(HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.refreshListenable != oldWidget.refreshListenable) {
+      oldWidget.refreshListenable?.removeListener(_loadDashboard);
+      widget.refreshListenable?.addListener(_loadDashboard);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.refreshListenable?.removeListener(_loadDashboard);
+    super.dispose();
+  }
+
+  /// Método público para forzar recarga inmediata (<100ms)
+  void refresh() => _loadDashboard();
 
   void _loadDashboard() {
     setState(() {
@@ -282,7 +303,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             )
                           : null,
                     ),
-                    const SizedBox(height: 24),
+                    if (widget.onScanReceipt != null) ...[
+                      const SizedBox(height: 16),
+                      _buildQuickScanBanner(context),
+                      const SizedBox(height: 20),
+                    ] else
+                      const SizedBox(height: 24),
 
                     // 2. Presupuestos por Categoría
                     Row(
@@ -378,4 +404,105 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  Widget _buildQuickScanBanner(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const Key('dashboard_quick_scan_banner'),
+        onTap: widget.onScanReceipt,
+        borderRadius: AppRadius.borderCard,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceBase,
+            borderRadius: AppRadius.borderCard,
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.5),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: AppRadius.borderSm,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.35),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.qr_code_scanner_rounded,
+                  color: AppColors.textMain,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Escanear Comprobante',
+                          style: AppTypography.labelLg.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textMain,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.incomeBg,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'OCR',
+                            style: AppTypography.captionBadge.copyWith(
+                              color: AppColors.incomeText,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Registra gastos al instante con tu cámara',
+                      style: AppTypography.bodySm.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.textSecondary,
+                size: 22,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
+

@@ -3,6 +3,7 @@ import '../../../core/components/app_components.dart';
 import '../../../core/theme/theme.dart';
 import '../../auth/data/auth_session_manager.dart';
 import '../../auth/presentation/delete_account_dialog.dart';
+import '../../categories/presentation/categories_screen.dart';
 import '../../financial_accounts/data/financial_accounts_api_service.dart';
 import '../../financial_accounts/presentation/financial_accounts_screen.dart';
 import 'widgets/update_password_sheet.dart';
@@ -253,6 +254,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 widget.sessionManager.apiClient,
                               ),
                               onBack: () => Navigator.of(context).pop(),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    _buildSettingsTile(
+                      icon: Icons.category_outlined,
+                      title: 'Categorías de Gastos',
+                      subtitle: 'Etiquetas, colores e iconos (RF-CAT-01, Screen C1)',
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => CategoriesScreen(
+                              apiClient: widget.sessionManager.apiClient,
                             ),
                           ),
                         );
