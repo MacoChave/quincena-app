@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { ConfirmReceiptScanDto } from './dto/confirm-receipt-scan.dto';
 
-const RECEIPT_SCANS_BUCKET = 'receipt-scans';
+const RECEIPT_SCANS_BUCKET = 'receipts';
 
 @Injectable()
 export class ReceiptScansService {

@@ -1,0 +1,121 @@
+--- a/quincena/lib/features/transactions/presentation/manual/widgets/account_selector_field.dart
++++ b/quincena/lib/features/transactions/presentation/manual/widgets/account_selector_field.dart
+@@ -151,12 +151,16 @@
+         Row(
+           mainAxisSize: MainAxisSize.min,
+           children: [
+-            Text(
+-              widget.label,
+-              style: AppTypography.labelMd.copyWith(
+-                fontWeight: FontWeight.w700,
+-                color: AppColors.textMain,
++            Flexible(
++              child: Text(
++                widget.label,
++                style: AppTypography.labelMd.copyWith(
++                  fontWeight: FontWeight.w700,
++                  color: AppColors.textMain,
++                ),
++                maxLines: 1,
++                overflow: TextOverflow.ellipsis,
+               ),
+             ),
+             if (widget.isRequired)
+@@ -358,35 +362,39 @@
+           // Cabecera: Título y Botón Cerrar
+           Row(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: [
+-              Row(
+-                children: [
+-                  Container(
+-                    width: 32,
+-                    height: 32,
+-                    decoration: BoxDecoration(
+-                      color: AppColors.primarySubtle,
+-                      borderRadius: AppRadius.borderSm,
++              Expanded(
++                child: Row(
++                  children: [
++                    Container(
++                      width: 32,
++                      height: 32,
++                      decoration: BoxDecoration(
++                        color: AppColors.primarySubtle,
++                        borderRadius: AppRadius.borderSm,
++                      ),
++                      child: const Icon(
++                        Icons.account_balance_rounded,
++                        size: 18,
++                        color: AppColors.primaryAccessible,
++                      ),
+                     ),
+-                    child: const Icon(
+-                      Icons.account_balance_rounded,
+-                      size: 18,
+-                      color: AppColors.primaryAccessible,
++                    const SizedBox(width: 10),
++                    Expanded(
++                      child: Column(
++                        crossAxisAlignment: CrossAxisAlignment.start,
++                        children: [
++                          Text(
++                            'Seleccionar Cuenta de Débito',
++                            style: AppTypography.headlineSm.copyWith(
++                              fontWeight: FontWeight.w700,
++                              color: AppColors.textMain,
++                            ),
++                            maxLines: 1,
++                            overflow: TextOverflow.ellipsis,
++                          ),
++                          Text(
++                            'Cuenta origen de los fondos para este gasto',
++                            style: AppTypography.bodySm,
++                            maxLines: 1,
++                            overflow: TextOverflow.ellipsis,
++                          ),
++                        ],
++                      ),
+                     ),
+-                    const SizedBox(width: 10),
+-                    Column(
+-                      crossAxisAlignment: CrossAxisAlignment.start,
+-                      children: [
+-                        Text(
+-                          'Seleccionar Cuenta de Débito',
+-                          style: AppTypography.headlineSm.copyWith(
+-                            fontWeight: FontWeight.w700,
+-                            color: AppColors.textMain,
+-                          ),
+-                        ),
+-                        Text(
+-                          'Cuenta origen de los fondos para este gasto',
+-                          style: AppTypography.bodySm,
+-                        ),
+-                      ],
+-                    ),
+-                  ],
+-                ),
++                  ],
++                ),
+               ),
+               IconButton(
+                 icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
+@@ -509,9 +517,13 @@
+                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                             children: [
+-                              Text(
+-                                acc.accountType.label,
+-                                style: AppTypography.captionBadge.copyWith(
+-                                  color: AppColors.textSecondary,
++                              Flexible(
++                                child: Text(
++                                  acc.accountType.label,
++                                  style: AppTypography.captionBadge.copyWith(
++                                    color: AppColors.textSecondary,
++                                  ),
++                                  maxLines: 1,
++                                  overflow: TextOverflow.ellipsis,
+                                 ),
+                               ),
+                               Text(

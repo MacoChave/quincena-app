@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/network/api_exception.dart';
 import '../../profile/data/models/user_profile.dart';
 import '../../profile/data/profile_api_service.dart';
 import 'auth_api_service.dart';
@@ -77,7 +78,7 @@ class AuthSessionManager extends ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _lastErrorMessage = e.toString().replaceFirst('ApiException: ', '');
+      _lastErrorMessage = ApiException.extractMessage(e);
       notifyListeners();
       return false;
     }
@@ -104,7 +105,7 @@ class AuthSessionManager extends ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _lastErrorMessage = e.toString().replaceFirst('ApiException: ', '');
+      _lastErrorMessage = ApiException.extractMessage(e);
       notifyListeners();
       return false;
     }

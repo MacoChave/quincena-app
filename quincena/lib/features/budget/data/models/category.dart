@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../financial_accounts/models/financial_account.dart';
 
-/// Modelo de categoría de presupuesto (RF-03 / RF-04)
+/// Modelo de categoría de presupuesto (RF-03 / RF-04 / RF-CAT-01)
 class Category {
   const Category({
     required this.id,
@@ -8,6 +9,7 @@ class Category {
     this.icon = 'category',
     this.colorHex = '#79ADDC',
     this.defaultAccountId,
+    this.defaultAccount,
     this.isArchived = false,
   });
 
@@ -16,6 +18,7 @@ class Category {
   final String icon;
   final String colorHex;
   final String? defaultAccountId;
+  final FinancialAccount? defaultAccount;
   final bool isArchived;
 
   Color get parsedColor {
@@ -27,12 +30,20 @@ class Category {
   }
 
   factory Category.fromJson(Map<String, dynamic> json) {
+    FinancialAccount? defaultAcc;
+    if (json['default_account'] is Map<String, dynamic>) {
+      defaultAcc = FinancialAccount.fromJson(
+        json['default_account'] as Map<String, dynamic>,
+      );
+    }
+
     return Category(
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? 'Sin categoría',
       icon: json['icon'] as String? ?? 'category',
       colorHex: json['color_hex'] as String? ?? '#79ADDC',
       defaultAccountId: json['default_account_id'] as String?,
+      defaultAccount: defaultAcc,
       isArchived: json['is_archived'] as bool? ?? false,
     );
   }
@@ -54,6 +65,7 @@ class Category {
     String? icon,
     String? colorHex,
     String? defaultAccountId,
+    FinancialAccount? defaultAccount,
     bool? isArchived,
   }) {
     return Category(
@@ -62,6 +74,7 @@ class Category {
       icon: icon ?? this.icon,
       colorHex: colorHex ?? this.colorHex,
       defaultAccountId: defaultAccountId ?? this.defaultAccountId,
+      defaultAccount: defaultAccount ?? this.defaultAccount,
       isArchived: isArchived ?? this.isArchived,
     );
   }

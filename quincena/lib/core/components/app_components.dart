@@ -6,6 +6,7 @@ export 'buttons/app_button.dart';
 export 'buttons/app_fab.dart';
 export 'cards/app_card.dart';
 export 'cards/app_hero_card.dart';
+export 'feedback/app_toast.dart';
 export 'inputs/app_amount_input.dart';
 export 'inputs/app_text_field.dart';
 export 'navigation/app_app_bar.dart';

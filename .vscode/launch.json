@@ -2,14 +2,52 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "debug: dev",
+      "name": "debug: dev (USB - Recomendado)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug",
-      "program": "quincena/lib/main.dart",
       "cwd": "${workspaceFolder}/quincena",
+      "program": "${workspaceFolder}/quincena/lib/main.dart",
+      "preLaunchTask": "adb: reverse port 3000",
       "args": [
-        "--dart-define=ENVIRONMENT=dev"
+        "--dart-define=ENVIRONMENT=dev",
+        "--dart-define=API_BASE_URL=http://127.0.0.1:3000/v1"
+      ]
+    },
+    {
+      "name": "debug: dev (Wi-Fi 192.168.10.116)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "cwd": "${workspaceFolder}/quincena",
+      "program": "${workspaceFolder}/quincena/lib/main.dart",
+      "args": [
+        "--dart-define=ENVIRONMENT=dev",
+        "--dart-define=API_BASE_URL=http://192.168.10.116:3000/v1"
+      ]
+    },
+    {
+      "name": "debug: dev (Emulador Android)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "cwd": "${workspaceFolder}/quincena",
+      "program": "${workspaceFolder}/quincena/lib/main.dart",
+      "args": [
+        "--dart-define=ENVIRONMENT=dev",
+        "--dart-define=API_BASE_URL=http://10.0.2.2:3000/v1"
+      ]
+    },
+    {
+      "name": "debug: dev (API Render en la Nube)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "cwd": "${workspaceFolder}/quincena",
+      "program": "${workspaceFolder}/quincena/lib/main.dart",
+      "args": [
+        "--dart-define=ENVIRONMENT=dev",
+        "--dart-define=API_BASE_URL=https://quincena-app.onrender.com/v1"
       ]
     },
     {
@@ -17,11 +55,11 @@
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug",
-      "program": "quincena/lib/main.dart",
       "cwd": "${workspaceFolder}/quincena",
-      "preLaunchTask": "build: dev",
+      "program": "${workspaceFolder}/quincena/lib/main.dart",
       "args": [
-        "--dart-define=ENVIRONMENT=dev"
+        "--dart-define=ENVIRONMENT=dev",
+        "--dart-define=API_BASE_URL=http://127.0.0.1:3000/v1"
       ]
     },
     {
@@ -29,22 +67,11 @@
       "request": "launch",
       "type": "dart",
       "flutterMode": "release",
-      "program": "quincena/lib/main.dart",
       "cwd": "${workspaceFolder}/quincena",
-      "preLaunchTask": "build: prod",
+      "program": "${workspaceFolder}/quincena/lib/main.dart",
       "args": [
-        "--dart-define=ENVIRONMENT=prod"
-      ]
-    },
-    {
-      "name": "quincena-mobile (run: release prod)",
-      "request": "launch",
-      "type": "dart",
-      "flutterMode": "release",
-      "program": "quincena/lib/main.dart",
-      "cwd": "${workspaceFolder}/quincena",
-      "args": [
-        "--dart-define=ENVIRONMENT=prod"
+        "--dart-define=ENVIRONMENT=prod",
+        "--dart-define=API_BASE_URL=https://quincena-app.onrender.com/v1"
       ]
     },
     {
@@ -72,10 +99,10 @@
   ],
   "compounds": [
     {
-      "name": "Full Stack (API Debug + Mobile Debug Dev)",
+      "name": "Full Stack (API + Mobile USB Dev)",
       "configurations": [
         "Debug: Quincena API (NestJS)",
-        "debug: dev"
+        "debug: dev (USB - Recomendado)"
       ]
     }
   ]

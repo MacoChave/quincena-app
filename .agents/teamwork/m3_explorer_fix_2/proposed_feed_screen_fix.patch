@@ -1,0 +1,156 @@
+--- a/quincena/lib/features/transactions/presentation/feed/transactions_feed_screen.dart
++++ b/quincena/lib/features/transactions/presentation/feed/transactions_feed_screen.dart
+@@ -400,6 +400,56 @@ class _TransactionsFeedScreenState extends State<TransactionsFeedScreen> {
++  /// Notificación estándar en parte inferior con clearance para evitar colisión de FAB
++  void _showFeedSuccessSnackBar(String message) {
++    if (!mounted) return;
++    final messenger = ScaffoldMessenger.of(context);
++    messenger.hideCurrentSnackBar();
++    messenger.showSnackBar(
++      SnackBar(
++        behavior: SnackBarBehavior.fixed,
++        backgroundColor: const Color(0xFF1B291E), // Fondo oscuro con tinte verde
++        duration: const Duration(seconds: 3),
++        content: Row(
++          children: [
++            const Icon(
++              Icons.check_circle_outline_rounded,
++              color: AppColors.incomeBg,
++              size: 22,
++            ),
++            const SizedBox(width: AppSpacing.spaceSm + 2),
++            Expanded(
++              child: Text(
++                message,
++                style: AppTypography.bodyMd.copyWith(
++                  color: const Color(0xFFEDFCF1),
++                  fontWeight: FontWeight.w500,
++                ),
++              ),
++            ),
++          ],
++        ),
++      ),
++    );
++  }
++
++  /// Notificación de error estándar
++  void _showFeedErrorSnackBar(String message) {
++    if (!mounted) return;
++    final messenger = ScaffoldMessenger.of(context);
++    messenger.hideCurrentSnackBar();
++    messenger.showSnackBar(
++      SnackBar(
++        behavior: SnackBarBehavior.fixed,
++        backgroundColor: const Color(0xFF2C1B1A), // Fondo oscuro con tinte cálido
++        duration: const Duration(seconds: 4),
++        content: Row(
++          children: [
++            const Icon(
++              Icons.error_outline_rounded,
++              color: AppColors.expenseBg,
++              size: 22,
++            ),
++            const SizedBox(width: AppSpacing.spaceSm + 2),
++            Expanded(
++              child: Text(
++                message,
++                style: AppTypography.bodyMd.copyWith(
++                  color: const Color(0xFFFFF0EC),
++                  fontWeight: FontWeight.w500,
++                ),
++              ),
++            ),
++          ],
++        ),
++      ),
++    );
++  }
++
+   Future<void> _handleDeleteTransaction(Transaction tx) async {
+@@ -444,7 +494,7 @@ class _TransactionsFeedScreenState extends State<TransactionsFeedScreen> {
+         if (!mounted) return;
+-        AppToast.showSuccess(context, 'Transacción eliminada correctamente.');
++        _showFeedSuccessSnackBar('Transacción eliminada correctamente.');
+         await _loadTransactionsForSelectedCycle();
+         widget.onTransactionDeleted?.call();
+       } catch (e) {
+         if (mounted) {
+-          AppToast.showError(context, 'Error al eliminar: $e');
++          _showFeedErrorSnackBar('Error al eliminar: $e');
+         }
+       }
+     }
+@@ -549,7 +599,7 @@ class _TransactionsFeedScreenState extends State<TransactionsFeedScreen> {
+                 onTap: () {
+                   Navigator.pop(ctx);
+-                  AppToast.showSuccess(
+-                    context,
++                  _showFeedSuccessSnackBar(
+                     'Reporte PDF generado exitosamente.',
+                   );
+                 },
+@@ -570,7 +620,7 @@ class _TransactionsFeedScreenState extends State<TransactionsFeedScreen> {
+                 onTap: () {
+                   Navigator.pop(ctx);
+-                  AppToast.showSuccess(
+-                    context,
++                  _showFeedSuccessSnackBar(
+                     'Archivo Excel generado y listo para compartir.',
+                   );
+                 },
+@@ -624,6 +674,8 @@ class _TransactionsFeedScreenState extends State<TransactionsFeedScreen> {
+     return Scaffold(
+       backgroundColor: AppColors.surfaceSubtle,
+-      body: SafeArea(
++      body: Stack(
++        children: [
++          SafeArea(
+         bottom: false,
+         child: RefreshIndicator(
+@@ -734,16 +786,18 @@ class _TransactionsFeedScreenState extends State<TransactionsFeedScreen> {
+                                       const Icon(
+                                         Icons.calendar_month_rounded,
+                                         size: 15,
+                                         color: AppColors.primary,
+                                       ),
+                                       const SizedBox(width: 5),
+-                                      Text(
+-                                        periodTitle,
+-                                        style: AppTypography.labelMd.copyWith(
+-                                          fontWeight: FontWeight.w700,
++                                      Flexible(
++                                        child: Text(
++                                          periodTitle,
++                                          maxLines: 1,
++                                          overflow: TextOverflow.ellipsis,
++                                          style: AppTypography.labelMd.copyWith(
++                                            fontWeight: FontWeight.w700,
++                                          ),
+                                         ),
+                                       ),
+                                     ],
+                                   ),
+                                   const SizedBox(height: 2),
+                                   Text(
+                                     'Gastado \$${totalSpent.toStringAsFixed(2)} de \$${totalBudgeted.toStringAsFixed(2)}',
++                                    maxLines: 1,
++                                    overflow: TextOverflow.ellipsis,
+                                     style: AppTypography.captionBadge.copyWith(
+                                       color: AppColors.textSecondary,
+                                     ),
+@@ -904,6 +958,11 @@ class _TransactionsFeedScreenState extends State<TransactionsFeedScreen> {
+           ),
+         ),
+       ),
+-      floatingActionButton: FeedSpeedDial(
+-        onScanReceipt: () => widget.onScanReceipt?.call(),
+-        onAddManualExpense: () => _effectiveManualExpense(),
++          FeedSpeedDial(
++            onScanReceipt: () => widget.onScanReceipt?.call(),
++            onAddManualExpense: () => _effectiveManualExpense(),
++          ),
++        ],
+       ),
+     );
+   }

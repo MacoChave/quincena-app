@@ -25,7 +25,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  String? _errorMessage;
 
   @override
   void dispose() {
@@ -37,8 +36,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _submitLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _errorMessage = null);
-
     final success = await widget.sessionManager.login(
       _emailController.text,
       _passwordController.text,
@@ -49,10 +46,9 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success) {
       widget.onLoginSuccess?.call();
     } else {
-      setState(() {
-        _errorMessage = widget.sessionManager.lastErrorMessage ??
-            'Credenciales incorrectas o error de conexión.';
-      });
+      final errorMsg = widget.sessionManager.lastErrorMessage ??
+          'Credenciales incorrectas o error de conexión.';
+      AppToast.showError(context, errorMsg);
     }
   }
 
@@ -121,34 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Mensaje de error general si falló la llamada al API
-                  if (_errorMessage != null) ...[
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.expenseBg.withValues(alpha: 0.3),
-                        borderRadius: AppRadius.borderMd,
-                        border: Border.all(color: AppColors.expenseText.withValues(alpha: 0.5)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.error_outline_rounded,
-                              color: AppColors.expenseText, size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _errorMessage!,
-                              style: AppTypography.bodySm.copyWith(
-                                color: AppColors.expenseText,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+
 
                   // 3. Formulario: Correo electrónico
                   AppTextField(

@@ -11,15 +11,25 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoriesService {
   constructor(private readonly supabase: SupabaseService) {}
 
-  async findAll(userId: string, accessToken: string) {
+  async findAll(
+    userId: string,
+    accessToken: string,
+    includeArchived: boolean = false,
+  ) {
     const client = this.supabase.getAuthenticatedClient(accessToken);
 
-    const { data, error } = await client
+    let query = client
       .from('categories')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_archived', false)
-      .order('name', { ascending: true });
+      .select(
+        '*, default_account:financial_accounts(id, name, color_hex, icon, account_type)',
+      )
+      .eq('user_id', userId);
+
+    if (!includeArchived) {
+      query = query.eq('is_archived', false);
+    }
+
+    const { data, error } = await query.order('name', { ascending: true });
 
     if (error) {
       throw new ConflictException(error.message);

@@ -13,7 +13,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
 import { User } from '@supabase/supabase-js';
 
-const RECEIPT_SCANS_BUCKET = 'receipt-scans';
+const RECEIPT_SCANS_BUCKET = 'receipts';
 
 @Injectable()
 export class AuthService {

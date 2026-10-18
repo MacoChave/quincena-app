@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_typography.dart';
+import '../buttons/app_fab.dart';
 
 class AppNavItem {
   const AppNavItem({
@@ -14,11 +15,13 @@ class AppNavItem {
   final IconData? activeIcon;
 }
 
-/// Barra de navegación inferior (NavBar) con muesca o espacio para el FAB central.
+/// Barra de navegación inferior (NavBar) con FAB central anclado e inmóvil.
 ///
 /// Especificación Stitch:
 /// - Altura base de 68px + safe area inset.
 /// - 4 items de navegación repartidos equitativamente alrededor del centro.
+/// - Botón FAB central anclado de forma fija en la barra mediante [Stack] para
+///   evitar que se desplace o brinque ante SnackBars, teclados o alteraciones de widgets.
 /// - Fondo blanco con borde superior sutil.
 /// - Estados activo (#1C242B) e inactivo (#5C6773).
 class AppBottomNavBar extends StatelessWidget {
@@ -27,11 +30,15 @@ class AppBottomNavBar extends StatelessWidget {
     required this.currentIndex,
     required this.onTap,
     this.items = defaultItems,
+    this.onFabPressed,
+    this.fab,
   });
 
   final int currentIndex;
   final ValueChanged<int> onTap;
   final List<AppNavItem> items;
+  final VoidCallback? onFabPressed;
+  final Widget? fab;
 
   static const List<AppNavItem> defaultItems = [
     AppNavItem(
@@ -63,7 +70,7 @@ class AppBottomNavBar extends StatelessWidget {
     final leftItems = items.sublist(0, halfCount);
     final rightItems = items.sublist(halfCount);
 
-    return Container(
+    final navBarBody = Container(
       decoration: const BoxDecoration(
         color: AppColors.surfaceBase,
         border: Border(
@@ -83,7 +90,7 @@ class AppBottomNavBar extends StatelessWidget {
               ...leftItems.asMap().entries.map(
                 (entry) => _buildNavItem(entry.key, entry.value),
               ),
-              // Espacio central para el FAB flotante
+              // Espacio central reservado para el FAB
               const SizedBox(width: 56),
               ...rightItems.asMap().entries.map(
                 (entry) => _buildNavItem(entry.key + halfCount, entry.value),
@@ -92,6 +99,26 @@ class AppBottomNavBar extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    final centralFab = fab ??
+        (onFabPressed != null ? AppFab(onPressed: onFabPressed!) : null);
+
+    if (centralFab == null) {
+      return navBarBody;
+    }
+
+    // Anclar el FAB rígidamente al NavBar para que ningún SnackBar o animación externa lo mueva
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.topCenter,
+      children: [
+        navBarBody,
+        Positioned(
+          top: -20,
+          child: centralFab,
+        ),
+      ],
     );
   }
 

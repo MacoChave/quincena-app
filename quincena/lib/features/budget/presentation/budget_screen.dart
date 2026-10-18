@@ -3,13 +3,16 @@ import '../../../core/components/app_components.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/theme.dart';
 import '../../auth/data/auth_session_manager.dart';
+import '../../categories/data/categories_api_service.dart';
+import '../../categories/presentation/categories_screen.dart';
+import '../../categories/presentation/widgets/category_form_sheet.dart';
 import '../data/models/models.dart';
 import '../data/services/budget_api_service.dart';
 import 'notifiers/budget_notifier.dart';
 import 'widgets/allocation_form_sheet.dart';
 import 'widgets/allocation_item_tile.dart';
 import 'widgets/funding_accounts_summary.dart';
-import 'widgets/template_form_sheet.dart';
+import 'widgets/template_item_form_sheet.dart';
 import 'widgets/templates_tab_view.dart';
 import 'widgets/zero_base_header_card.dart';
 
@@ -19,10 +22,12 @@ class BudgetScreen extends StatefulWidget {
     super.key,
     required this.apiClient,
     this.sessionManager,
+    this.budgetNotifier,
   });
 
   final ApiClient apiClient;
   final AuthSessionManager? sessionManager;
+  final BudgetNotifier? budgetNotifier;
 
   @override
   State<BudgetScreen> createState() => _BudgetScreenState();
@@ -33,21 +38,57 @@ class _BudgetScreenState extends State<BudgetScreen>
   late final BudgetApiService _apiService;
   late final BudgetNotifier _notifier;
   late final TabController _tabController;
+  late final bool _internalNotifier;
 
   @override
   void initState() {
     super.initState();
     _apiService = BudgetApiService(widget.apiClient);
-    _notifier = BudgetNotifier(apiService: _apiService);
+    _internalNotifier = widget.budgetNotifier == null;
+    _notifier = widget.budgetNotifier ?? BudgetNotifier(apiService: _apiService);
     _tabController = TabController(length: 2, vsync: this);
-    _notifier.loadData();
+    if (_internalNotifier) {
+      _notifier.loadData();
+    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    _notifier.dispose();
+    if (_internalNotifier) {
+      _notifier.dispose();
+    }
     super.dispose();
+  }
+
+  Future<Category?> _openCreateCategoryModal() async {
+    final categoriesService = CategoriesApiService(widget.apiClient);
+    final newCat = await showModalBottomSheet<Category?>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => CategoryFormSheet(
+        accounts: _notifier.accounts,
+        onSave: ({
+          required String name,
+          required String icon,
+          required String colorHex,
+          String? defaultAccountId,
+        }) async {
+          return await categoriesService.createCategory(
+            name: name,
+            icon: icon,
+            colorHex: colorHex,
+            defaultAccountId: defaultAccountId,
+          );
+        },
+      ),
+    );
+
+    if (newCat != null) {
+      await _notifier.loadData();
+    }
+    return newCat;
   }
 
   void _openAllocationSheet([BudgetAllocation? allocation]) {
@@ -60,6 +101,7 @@ class _BudgetScreenState extends State<BudgetScreen>
         categories: _notifier.categories,
         accounts: _notifier.accounts,
         currentUnallocated: _notifier.summary.unallocated,
+        onCreateCategoryRequested: _openCreateCategoryModal,
         onSave: ({
           required String categoryId,
           required double allocatedAmount,
@@ -131,11 +173,14 @@ class _BudgetScreenState extends State<BudgetScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) => TemplateFormSheet(
+      builder: (sheetContext) => TemplateItemFormSheet(
         template: template,
         period: _notifier.selectedTemplatePeriod,
+        existingTemplates: _notifier.currentTemplates,
         categories: _notifier.categories,
         accounts: _notifier.accounts,
+        estimatedIncome: _notifier.activeCycle?.totalIncome ?? 0.0,
+        onCreateCategoryRequested: _openCreateCategoryModal,
         onSave: ({
           required QuincenaPeriod period,
           required String categoryId,
@@ -210,6 +255,18 @@ class _BudgetScreenState extends State<BudgetScreen>
       appBar: AppAppBar(
         title: 'Presupuestos Quincenales',
         actions: [
+          IconButton(
+            icon: const Icon(Icons.category_outlined, color: AppColors.textMain),
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => CategoriesScreen(apiClient: widget.apiClient),
+                ),
+              );
+              _notifier.loadData();
+            },
+            tooltip: 'Mantenimiento de Categorías',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: AppColors.textMain),
             onPressed: _notifier.loadData,

@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
@@ -34,10 +35,14 @@ export class CategoriesController {
   constructor(private readonly service: CategoriesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Listar categorías activas del usuario' })
+  @ApiOperation({ summary: 'Listar categorías del usuario' })
   @ApiOkResponse({ description: 'Lista de categorías' })
-  findAll(@CurrentUser() user: User, @AccessToken() token: string) {
-    return this.service.findAll(user.id, token);
+  findAll(
+    @CurrentUser() user: User,
+    @AccessToken() token: string,
+    @Query('include_archived') includeArchived?: string,
+  ) {
+    return this.service.findAll(user.id, token, includeArchived === 'true');
   }
 
   @Post()

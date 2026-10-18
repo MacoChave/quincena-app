@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'core/components/app_components.dart';
 import 'core/network/api_client.dart';
 import 'core/theme/theme.dart';
 import 'features/auth/data/auth_session_manager.dart';
 import 'features/auth/presentation/login_screen.dart';
+import 'features/budget/data/services/budget_api_service.dart';
 import 'features/budget/presentation/budget_screen.dart';
+import 'features/budget/presentation/notifiers/budget_notifier.dart';
 import 'features/dashboard/data/dashboard_api_service.dart';
 import 'features/dashboard/presentation/home_screen.dart';
+import 'features/ocr/presentation/ocr_scanner_screen.dart';
+import 'features/ocr/presentation/widgets/capture_source_sheet.dart';
 import 'features/profile/presentation/profile_screen.dart';
+import 'features/transactions/data/services/transaction_api_service.dart';
+import 'features/transactions/presentation/feed/transactions_feed_screen.dart';
+import 'features/transactions/presentation/manual/manual_expense_form_sheet.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,11 +100,89 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
   late final DashboardApiService _dashboardApiService;
+  late final BudgetApiService _budgetApiService;
+  late final BudgetNotifier _budgetNotifier;
+  late final TransactionApiService _transactionApiService;
+  final ValueNotifier<int> _dashboardRefreshSignal = ValueNotifier<int>(0);
 
   @override
   void initState() {
     super.initState();
     _dashboardApiService = DashboardApiService(widget.apiClient);
+    _budgetApiService = BudgetApiService(widget.apiClient);
+    _transactionApiService = TransactionApiService(widget.apiClient);
+    _budgetNotifier = BudgetNotifier(apiService: _budgetApiService);
+    _budgetNotifier.loadData();
+  }
+
+  @override
+  void dispose() {
+    _budgetNotifier.dispose();
+    _dashboardRefreshSignal.dispose();
+    super.dispose();
+  }
+
+  void _handleBalanceRefresh() {
+    _dashboardRefreshSignal.value++;
+    _budgetNotifier.refreshAllocations();
+  }
+
+  Future<void> _openCaptureSourceSheet() async {
+    final selected = await CaptureSourceSheet.show(context);
+    if (!mounted || selected == null) return;
+
+    switch (selected) {
+      case CaptureSourceOption.camera:
+        await _openOcrScannerFlow(ImageSource.camera);
+        break;
+      case CaptureSourceOption.gallery:
+        await _openOcrScannerFlow(ImageSource.gallery);
+        break;
+      case CaptureSourceOption.manual:
+        await _openManualExpenseFlow();
+        break;
+    }
+  }
+
+  Future<void> _openOcrScannerFlow([ImageSource? initialSource]) async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (context) => OcrScannerScreen(
+          apiClient: widget.apiClient,
+          initialSource: initialSource,
+          onManualRequested: () {
+            Navigator.of(context).pop();
+            _openManualExpenseFlow();
+          },
+          onTransactionConfirmed: _handleBalanceRefresh,
+        ),
+      ),
+    );
+
+    if (result == true) {
+      _handleBalanceRefresh();
+    }
+  }
+
+  Future<void> _openManualExpenseFlow() async {
+    final activeCycle = _budgetNotifier.activeCycle;
+    final cycleId = activeCycle?.id ?? 'cycle_default';
+
+    final result = await ManualExpenseFormSheet.show(
+      context: context,
+      cycleId: cycleId,
+      transactionApiService: _transactionApiService,
+      budgetNotifier: _budgetNotifier,
+      onBalanceRefresh: _handleBalanceRefresh,
+      allocations: _budgetNotifier.allocations,
+      categories: _budgetNotifier.categories,
+      accounts: _budgetNotifier.accounts,
+      onTransactionCreated: (_) => _handleBalanceRefresh(),
+    );
+
+    if (result != null) {
+      _handleBalanceRefresh();
+    }
   }
 
   @override
@@ -104,18 +190,27 @@ class _MainShellState extends State<MainShell> {
     final screens = [
       HomeScreen(
         dashboardApiService: _dashboardApiService,
+        refreshListenable: _dashboardRefreshSignal,
         onOpenProfile: () => setState(() => _currentIndex = 3),
-        onScanReceipt: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Acción: Escaneo OCR de Comprobantes')),
-          );
-        },
+        onScanReceipt: () => _openOcrScannerFlow(ImageSource.camera),
       ),
       BudgetScreen(
         apiClient: widget.apiClient,
         sessionManager: widget.sessionManager,
+        budgetNotifier: _budgetNotifier,
       ),
-      const PlaceholderView(title: 'Historial de Transacciones'),
+      TransactionsFeedScreen(
+        apiClient: widget.apiClient,
+        transactionApiService: _transactionApiService,
+        budgetApiService: _budgetApiService,
+        dashboardApiService: _dashboardApiService,
+        budgetNotifier: _budgetNotifier,
+        refreshListenable: _dashboardRefreshSignal,
+        onTransactionDeleted: _handleBalanceRefresh,
+        onScanReceipt: () => _openOcrScannerFlow(ImageSource.camera),
+        onAddManualExpense: _openManualExpenseFlow,
+        onManualExpense: _openManualExpenseFlow,
+      ),
       ProfileScreen(
         sessionManager: widget.sessionManager,
         onLoggedOut: () {
@@ -133,14 +228,7 @@ class _MainShellState extends State<MainShell> {
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: AppFab(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Acción: Abrir Escáner OCR de Tickets')),
-          );
-        },
+        onFabPressed: _openCaptureSourceSheet,
       ),
     );
   }

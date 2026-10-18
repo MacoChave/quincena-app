@@ -40,16 +40,21 @@ abstract final class AppConfig {
   /// Nombre legible del entorno actual
   static String get environmentName => isProd ? 'Producción' : 'Desarrollo';
 
-  /// URL base por defecto del backend según el entorno
+  /// URL base oficial del API en producción (Render)
+  static const String prodApiUrl = 'https://quincena-app.onrender.com/v1';
+
+  /// URL base por defecto para desarrollo local
+  static const String devDefaultApiUrl = 'http://127.0.0.1:3000/v1';
+
+  /// URL base del backend según el entorno
   static String? get configuredApiUrl {
     if (_customApiUrl.isNotEmpty) {
       return _customApiUrl;
     }
     if (isProd) {
-      // URL de producción por defecto
-      return 'https://api.quincena.app/v1';
+      return prodApiUrl;
     }
-    // En dev retorna null para permitir la detección de localhost / 10.0.2.2 en ApiClient
+    // En dev retorna null para permitir la resolución dinámica por plataforma en ApiClient
     return null;
   }
 }

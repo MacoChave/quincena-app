@@ -128,6 +128,31 @@ class BudgetNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Descuenta de forma inmediata (<10ms) un gasto de la bolsa presupuestaria activa (CA-04.2, CA-06.2).
+  void deductExpense({
+    required String? allocationId,
+    required double amount,
+  }) {
+    if (amount <= 0) return;
+
+    if (allocationId != null && allocationId.isNotEmpty) {
+      final index = _allocations.indexWhere(
+        (a) => a.id == allocationId || a.categoryId == allocationId,
+      );
+      if (index != -1) {
+        final current = _allocations[index];
+        final newSpent = current.spentAmount + amount;
+        final newAvailable = current.allocatedAmount - newSpent;
+        _allocations[index] = current.copyWith(
+          spentAmount: newSpent,
+          availableAmount: newAvailable,
+        );
+      }
+    }
+
+    recalculateZeroBase();
+  }
+
   /// Cambia la pestaña de plantillas (1ra vs 2da Quincena)
   void switchTemplatePeriod(QuincenaPeriod period) {
     if (_selectedTemplatePeriod != period) {
