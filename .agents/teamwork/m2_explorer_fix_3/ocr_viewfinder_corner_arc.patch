@@ -1,0 +1,12 @@
+diff --git a/quincena/lib/features/ocr/presentation/widgets/ocr_viewfinder.dart b/quincena/lib/features/ocr/presentation/widgets/ocr_viewfinder.dart
+--- a/quincena/lib/features/ocr/presentation/widgets/ocr_viewfinder.dart
++++ b/quincena/lib/features/ocr/presentation/widgets/ocr_viewfinder.dart
+@@ -677,7 +677,7 @@ class _ViewfinderOverlayPainter extends CustomPainter {
+       ..arcToPoint(
+         Offset(cutoutRect.right, cutoutRect.bottom - r),
+         radius: Radius.circular(r),
+-        clockwise: true,
++        clockwise: false,
+       )
+       ..lineTo(cutoutRect.right, cutoutRect.bottom - cl);
+     canvas.drawPath(brPath, cornerPaint);

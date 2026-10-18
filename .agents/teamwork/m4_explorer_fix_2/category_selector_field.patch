@@ -1,0 +1,134 @@
+--- a/quincena/lib/features/transactions/presentation/manual/widgets/category_selector_field.dart
++++ b/quincena/lib/features/transactions/presentation/manual/widgets/category_selector_field.dart
+@@ -276,21 +276,25 @@
+         Row(
+           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+           children: [
+-            Row(
+-              mainAxisSize: MainAxisSize.min,
+-              children: [
+-                Text(
+-                  widget.label,
+-                  style: AppTypography.labelMd.copyWith(
+-                    fontWeight: FontWeight.w700,
+-                    color: AppColors.textMain,
++            Expanded(
++              child: Row(
++                mainAxisSize: MainAxisSize.min,
++                children: [
++                  Flexible(
++                    child: Text(
++                      widget.label,
++                      style: AppTypography.labelMd.copyWith(
++                        fontWeight: FontWeight.w700,
++                        color: AppColors.textMain,
++                      ),
++                      maxLines: 1,
++                      overflow: TextOverflow.ellipsis,
++                    ),
+                   ),
+-                ),
+-                if (widget.isRequired)
+-                  Text(
+-                    ' *',
+-                    style: AppTypography.labelMd.copyWith(
+-                      color: AppColors.expenseText,
+-                      fontWeight: FontWeight.w700,
++                  if (widget.isRequired)
++                    Text(
++                      ' *',
++                      style: AppTypography.labelMd.copyWith(
++                        color: AppColors.expenseText,
++                        fontWeight: FontWeight.w700,
++                      ),
+                     ),
+-                  ),
+-              ],
++                ],
++              ),
+             ),
+             if (widget.showAddButtonInHeader)
+               TextButton.icon(
+@@ -550,23 +554,27 @@
+           // Cabecera: Título y Botón Cerrar
+           Row(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: [
+-              Row(
+-                children: [
+-                  Container(
+-                    width: 32,
+-                    height: 32,
+-                    decoration: BoxDecoration(
+-                      color: AppColors.primarySubtle,
+-                      borderRadius: AppRadius.borderSm,
++              Expanded(
++                child: Row(
++                  children: [
++                    Container(
++                      width: 32,
++                      height: 32,
++                      decoration: BoxDecoration(
++                        color: AppColors.primarySubtle,
++                        borderRadius: AppRadius.borderSm,
++                      ),
++                      child: const Icon(
++                        Icons.category_rounded,
++                        size: 18,
++                        color: AppColors.primaryAccessible,
++                      ),
+                     ),
+-                    child: const Icon(
+-                      Icons.category_rounded,
+-                      size: 18,
+-                      color: AppColors.primaryAccessible,
++                    const SizedBox(width: 10),
++                    Expanded(
++                      child: Text(
++                        'Seleccionar Categoría',
++                        style: AppTypography.headlineSm.copyWith(
++                          fontWeight: FontWeight.w700,
++                          color: AppColors.textMain,
++                        ),
++                        maxLines: 1,
++                        overflow: TextOverflow.ellipsis,
++                      ),
+                     ),
+-                  ),
+-                  const SizedBox(width: 10),
+-                  Text(
+-                    'Seleccionar Categoría',
+-                    style: AppTypography.headlineSm.copyWith(
+-                      fontWeight: FontWeight.w700,
+-                      color: AppColors.textMain,
+-                    ),
+-                  ),
+-                ],
++                  ],
++                ),
+               ),
+               IconButton(
+                 icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
+@@ -754,12 +762,14 @@
+                                   const SizedBox(width: 6),
+-                                  Text(
+-                                    'Disponible: ${_formatCurrency(alloc.computedAvailable)}',
+-                                    style: AppTypography.captionBadge.copyWith(
+-                                      color: alloc.computedAvailable < 0
+-                                          ? AppColors.expenseText
+-                                          : AppColors.textSecondary,
+-                                      fontWeight: FontWeight.w600,
++                                  Expanded(
++                                    child: Text(
++                                      'Disponible: ${_formatCurrency(alloc.computedAvailable)}',
++                                      style: AppTypography.captionBadge.copyWith(
++                                        color: alloc.computedAvailable < 0
++                                            ? AppColors.expenseText
++                                            : AppColors.textSecondary,
++                                        fontWeight: FontWeight.w600,
++                                      ),
++                                      maxLines: 1,
++                                      overflow: TextOverflow.ellipsis,
+                                     ),
+                                   ),
+                                 ],

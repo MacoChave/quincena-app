@@ -1,0 +1,8 @@
+# Dead Ends — Quincena Project
+
+| Iteration | Approach Tried | Why It Failed | Files Touched |
+|-----------|---------------|---------------|---------------|
+| M2 Iteration 1 | Unchecked substring matching in history (`clean.contains(txMerchant)`) without checking for empty or short merchant strings | In Dart, `anyString.contains("") == true`. Any historical transaction with empty or whitespace merchant hijacked all subsequent scan suggestions. | `quincena/lib/features/ocr/domain/services/suggestion_engine.dart` |
+| M2 Iteration 1 | Using `tester.pumpAndSettle()` in widget tests with screens containing infinite repeating animations (`_pulseController.repeat()`, `_laserController.repeat()`) | Flutter `pumpAndSettle` polls until scheduled frames settle; with repeating ticker animations, it never settles and times out after 10 minutes. | `quincena/test/features/ocr/ocr_capture_stress_challenge_test.dart` |
+| M3 Iteration 1 | Unconstrained fixed `Row`s in `TransactionCard`, `FeedAnalyticsBento`, `TransactionsFeedScreen`, and `TransactionDetailSheet` without `Flexible`/`Expanded` or text truncation | Caused horizontal `RenderFlex` overflows (27px to 115px) on mobile viewports ≤400px wide. | `feed_analytics_bento.dart`, `transactions_feed_screen.dart`, `transaction_card.dart`, `transaction_detail_sheet.dart` |
+| M3 Iteration 1 | Testing with synthetic test widget stubs (`TransactionsFeedScreenTestWidget`) omitting bento, switcher, detail sheet, and delete actions | Masked production layout crashes and floating snackbar collision in CI tests. Tests must mount real production widgets. | `quincena/test/features/transactions/transactions_feed_and_filter_test.dart` |

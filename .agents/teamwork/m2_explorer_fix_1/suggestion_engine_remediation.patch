@@ -1,0 +1,43 @@
+--- a/quincena/lib/features/ocr/domain/services/suggestion_engine.dart
++++ b/quincena/lib/features/ocr/domain/services/suggestion_engine.dart
+@@ -38,10 +38,16 @@
+     // 1. Coincidencia exacta o parcial en el historial de transacciones del usuario
+     for (final tx in history) {
+       final txMerchant = tx.merchantName.trim().toLowerCase();
+-      if ((txMerchant == clean ||
+-              clean.contains(txMerchant) ||
+-              txMerchant.contains(clean)) &&
+-          tx.category != null) {
++      // Protección contra falsos positivos:
++      // - Si txMerchant está vacío o solo contiene espacios, no debe coincidir (en Dart, anyString.contains("") == true).
++      // - Coincidencia exacta permitida para cualquier longitud (ej. "OX", "BP").
++      // - Coincidencia parcial/subcadena requiere longitud mínima (>= 3 caracteres) en ambas cadenas
++      //   para evitar coincidencias accidentales con sílabas cortas como "la", "de", "el".
++      final isExactMatch = txMerchant.isNotEmpty && txMerchant == clean;
++      final isSubstringMatch = txMerchant.length >= 3 &&
++          clean.length >= 3 &&
++          (clean.contains(txMerchant) || txMerchant.contains(clean));
++
++      if ((isExactMatch || isSubstringMatch) && tx.category != null) {
+         final catMatch = activeCategories
+             .where((c) => c.id == tx.category!.id)
+             .firstOrNull;
+@@ -151,10 +157,14 @@
+       return suggestion['category_id'];
+     }
+ 
+-    // Coincidencia directa por nombre de categoría
++    // Coincidencia directa por nombre de categoría con protección de longitud mínima
+     final cleanMerchant = merchantName.trim().toLowerCase();
+     for (final cat in activeCategories) {
+-      final catNorm = cat.name.toLowerCase();
+-      if (cleanMerchant.contains(catNorm) || catNorm.contains(cleanMerchant)) {
++      final catNorm = cat.name.trim().toLowerCase();
++      final isExact = catNorm.isNotEmpty && cleanMerchant == catNorm;
++      final isSubstring = catNorm.length >= 3 &&
++          cleanMerchant.length >= 3 &&
++          (cleanMerchant.contains(catNorm) || catNorm.contains(cleanMerchant));
++      if (isExact || isSubstring) {
+         return cat.id;
+       }
+     }

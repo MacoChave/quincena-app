@@ -1,0 +1,14 @@
+diff --git a/quincena/lib/features/ocr/presentation/widgets/ocr_validation_sheet.dart b/quincena/lib/features/ocr/presentation/widgets/ocr_validation_sheet.dart
+--- a/quincena/lib/features/ocr/presentation/widgets/ocr_validation_sheet.dart
++++ b/quincena/lib/features/ocr/presentation/widgets/ocr_validation_sheet.dart
+@@ -257,7 +257,9 @@ class _OcrValidationSheetState extends State<OcrValidationSheet> {
+     final picked = await showDatePicker(
+       context: context,
+       initialDate: _selectedDate,
+-      firstDate: DateTime(2020),
++      firstDate: _selectedDate.isBefore(DateTime(2020))
++          ? _selectedDate
++          : DateTime(2020),
+       lastDate: DateTime.now().add(const Duration(days: 365)),
+       builder: (context, child) {
+         return Theme(

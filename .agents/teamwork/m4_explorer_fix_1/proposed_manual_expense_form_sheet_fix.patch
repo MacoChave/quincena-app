@@ -1,0 +1,189 @@
+--- a/quincena/lib/features/transactions/presentation/manual/manual_expense_form_sheet.dart
++++ b/quincena/lib/features/transactions/presentation/manual/manual_expense_form_sheet.dart
+@@ -87,7 +87,8 @@ class DecimalCurrencyInputFormatter extends TextInputFormatter {
+ /// - Selector obligatorio de cuenta de débito (`AccountSelectorField`) con auto-selección de cuenta
+ ///   por defecto de la categoría (`RN-CAT-01`).
+ /// - Campo opcional de notas o descripción adicional.
+-/// - Botón primario: "Guardar Gasto" con indicador de carga durante la persistencia.
++/// - Botón primario: "Guardar Gasto" con indicador de carga durante la persistencia y guardia síncrona
++///   contra doble toque para prevenir condiciones de carrera.
+ /// - Intercepción reactiva de advertencia de duplicado HTTP 409 Conflict (RN-03) mediante
+ ///   `DuplicateWarningDialog` y reintento con `?force=true`.
+ /// - Sincronización en tiempo real (<100ms) con `BudgetNotifier.deductExpense` y `onBalanceRefresh`.
+@@ -348,41 +349,86 @@ class _ManualExpenseFormSheetState extends State<ManualExpenseFormSheet> {
+   }
+ 
+   Future<void> _submitExpense() async {
++    // Protección síncrona inmediata contra doble toque (double-tap race condition)
++    if (_isSubmitting) return;
++    _isSubmitting = true;
++
+     // 0. Validar si el ciclo está cerrado (RN-01)
+     if (widget.isCycleClosed) {
+-      setState(() => _errorMessage =
+-          'No se pueden registrar gastos en un ciclo cerrado (RN-01)');
++      if (mounted) {
++        setState(() {
++          _isSubmitting = false;
++          _errorMessage =
++              'No se pueden registrar gastos en un ciclo cerrado (RN-01)';
++        });
++      } else {
++        _isSubmitting = false;
++      }
+       return;
+     }
+ 
+     // 1. Validar monto
+     final amount = _parseAmount();
+     if (amount <= 0.0) {
+-      setState(() => _errorMessage = 'El monto debe ser mayor a 0.00');
++      if (mounted) {
++        setState(() {
++          _isSubmitting = false;
++          _errorMessage = 'El monto debe ser mayor a 0.00';
++        });
++      } else {
++        _isSubmitting = false;
++      }
+       return;
+     }
+ 
+     // 2. Validar nombre de comercio
+     final merchant = _merchantController.text.trim();
+     if (merchant.isEmpty) {
+-      setState(() => _errorMessage = 'El comercio o nota es obligatorio');
++      if (mounted) {
++        setState(() {
++          _isSubmitting = false;
++          _errorMessage = 'El comercio o nota es obligatorio';
++        });
++      } else {
++        _isSubmitting = false;
++      }
+       return;
+     }
+     if (merchant.length > 120) {
+-      setState(() =>
+-          _errorMessage = 'El comercio no puede exceder 120 caracteres');
++      if (mounted) {
++        setState(() {
++          _isSubmitting = false;
++          _errorMessage = 'El comercio no puede exceder 120 caracteres';
++        });
++      } else {
++        _isSubmitting = false;
++      }
+       return;
+     }
+ 
+     // 3. Validar categoría
+     if (_selectedCategoryId == null || _selectedCategoryId!.isEmpty) {
+-      setState(() => _errorMessage = 'Seleccione una categoría obligatoria');
++      if (mounted) {
++        setState(() {
++          _isSubmitting = false;
++          _errorMessage = 'Seleccione una categoría obligatoria';
++        });
++      } else {
++        _isSubmitting = false;
++      }
+       return;
+     }
+ 
+     // 4. Validar cuenta financiera de débito
+     if (_selectedAccountId == null || _selectedAccountId!.isEmpty) {
+-      setState(() => _errorMessage = 'Seleccione una cuenta financiera obligatoria');
++      if (mounted) {
++        setState(() {
++          _isSubmitting = false;
++          _errorMessage = 'Seleccione una cuenta financiera obligatoria';
++        });
++      } else {
++        _isSubmitting = false;
++      }
+       return;
+     }
+ 
+@@ -403,7 +449,16 @@ class _ManualExpenseFormSheetState extends State<ManualExpenseFormSheet> {
+       transactionType: TransactionType.expense,
+     );
+ 
+-    await _executeCreation(dto, force: false);
++    try {
++      await _executeCreation(dto, force: false);
++    } catch (_) {
++      if (mounted) {
++        setState(() => _isSubmitting = false);
++      } else {
++        _isSubmitting = false;
++      }
++      rethrow;
++    }
+   }
+ 
+   Future<void> _executeCreation(CreateTransactionDto dto, {bool force = false}) async {
+@@ -539,34 +594,40 @@ class _ManualExpenseFormSheetState extends State<ManualExpenseFormSheet> {
+             ),
+           ),
+ 
+-          // Cabecera: Icono, Título y Botón Cerrar
++          // Cabecera: Icono, Título y Botón Cerrar (con protección de desbordamiento horizontal)
+           Row(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: [
+-              Row(
+-                children: [
+-                  Container(
+-                    width: 34,
+-                    height: 34,
+-                    decoration: const BoxDecoration(
+-                      color: AppColors.primarySubtle,
+-                      shape: BoxShape.circle,
+-                    ),
+-                    child: const Icon(
+-                      Icons.edit_note_rounded,
+-                      size: 20,
+-                      color: AppColors.primaryAccessible,
++              Expanded(
++                child: Row(
++                  children: [
++                    Container(
++                      width: 34,
++                      height: 34,
++                      decoration: const BoxDecoration(
++                        color: AppColors.primarySubtle,
++                        shape: BoxShape.circle,
++                      ),
++                      child: const Icon(
++                        Icons.edit_note_rounded,
++                        size: 20,
++                        color: AppColors.primaryAccessible,
+                       ),
+                     ),
+-                  ),
+-                  const SizedBox(width: 10),
+-                  Text(
+-                    'Nuevo Gasto Manual',
+-                    style: AppTypography.headlineSm.copyWith(
+-                      fontWeight: FontWeight.w700,
+-                      color: AppColors.textMain,
++                    const SizedBox(width: 10),
++                    Expanded(
++                      child: Text(
++                        'Nuevo Gasto Manual',
++                        style: AppTypography.headlineSm.copyWith(
++                          fontWeight: FontWeight.w700,
++                          color: AppColors.textMain,
++                        ),
++                        maxLines: 1,
++                        overflow: TextOverflow.ellipsis,
++                      ),
+                     ),
+-                  ),
+-                ],
++                  ],
++                ),
+               ),
+               IconButton(
+                 key: const Key('manual_close_button'),

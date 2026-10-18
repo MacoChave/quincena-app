@@ -1,0 +1,27 @@
+--- a/quincena/pubspec.yaml
++++ b/quincena/pubspec.yaml
+@@ -37,6 +37,7 @@
+   cupertino_icons: ^1.0.8
+   google_fonts: ^9.0.0
+   http: ^1.2.0
++  image_picker: ^1.1.2
+ 
+ dev_dependencies:
+   flutter_test:
+
+--- a/quincena/lib/core/network/api_exception.dart
++++ b/quincena/lib/core/network/api_exception.dart
+@@ -8,11 +8,13 @@
+     required this.statusCode,
+     required this.message,
+     this.error,
++    this.details,
+   });
+ 
+   final int statusCode;
+   final String message;
+   final String? error;
++  final dynamic details;
+ 
+   bool get isUnauthorized => statusCode == 401;
+   bool get isForbidden => statusCode == 403;
